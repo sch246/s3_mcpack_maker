@@ -31,7 +31,8 @@ class file:
         self.__setpath()
 
     def __getpath(self):
-        match = re.match(r'([a-z0-9_\-]*):([a-z0-9_\-/\.]*)', self.name)
+        match = re.match(
+            r'([\#a-z0-9_\-][a-z0-9_\-]*):([a-z0-9_\-/\.]*)', self.name)
         if match != None:
             self.space = match.group(1).replace('#', '')
             self.space_path = match.group(2)
@@ -162,6 +163,14 @@ def re_empty(list):
             list2.append(str)
     return list2
 
+def cuthash(list):
+    list2 = []
+    for str in list:
+        if str[0] == '#':
+            cutfirst(str)
+        list2.append(str.replace(' ',''))
+    return list2
+        
 
 def partstr(str):
     value = ['']
