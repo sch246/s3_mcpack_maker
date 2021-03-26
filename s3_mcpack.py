@@ -189,6 +189,15 @@ def partstr(str):
     return re_empty(value)
 
 
+def evallist(list):
+    list2 = []
+    for str in list:
+        try:
+            list2.append(eval(str))
+        except:
+            list2.append(str)
+    return list2
+
 
 class customfunc:
     def __init__(self,commandstr):
@@ -198,8 +207,9 @@ class customfunc:
         self.value = []
         self.function = getattr(customfuncs, self.name, None)
 
-    def execute(self):
-        self.function(self.command, self.value)
+    def execute(self, flag):
+        self.command = evallist(self.command)
+        return self.function(self.command, self.value, flag)
 
 
 
@@ -271,7 +281,7 @@ class func(file):
         for mcfunc in funcs:
             if type(mcfunc) == customfunc:
                 #通过返回值决定是否重复运行
-                alist = mcfunc.function(mcfunc.command, mcfunc.value, flag)
+                alist = mcfunc.execute(flag)
                 if type(alist) == type((1,2)):
                     flag = alist[1]
                     alist = alist[0]
