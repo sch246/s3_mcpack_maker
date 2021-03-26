@@ -167,7 +167,7 @@ def cuthash(list):
     list2 = []
     for str in list:
         if str[0] == '#':
-            cutfirst(str)
+            str = cutfirst(str)
         list2.append(str.replace(' ',''))
     return list2
         
