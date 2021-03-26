@@ -29,7 +29,7 @@
 
 比如
 
-#以下是一个mcfunction文件,绝对路径记为'<mcpath>'
+#以下是一个mcfunction文件,绝对路径记为mcpath
     
     #setfunc s3_tp:load
 
@@ -40,8 +40,10 @@
 因为刚做好大概的就发上来了所以要使用得用python的命令行或新建脚本来运行,注意运行路径要选在datapack的根目录,和pack.mcmeta并列
 
     import s3_mcpack as s3
+    
+    mcpath = 对应mcfunction的路径
 
-    s3.installpack(r'<mcpath>')
+    s3.installpack(mcpath)
     
 类似这样就行
 
