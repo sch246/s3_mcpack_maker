@@ -31,33 +31,33 @@
 
 #以下是一个mcfunction文件,绝对路径记为'<mcpath>'
     
-#setfunc s3_tp:load
+    #setfunc s3_tp:load
 
-    #mcfor treetype in ['oak','birch','spruce','dark_oak','acacia','jungle']
-    
-        #mc setblock ~ ~ ~ treetype_log
-        
+        #mcfor treetype in ['oak','birch','spruce','dark_oak','acacia','jungle']
+
+            #mc setblock ~ ~ ~ treetype_log
+
 因为刚做好大概的就发上来了所以要使用得用python的命令行或新建脚本来运行,注意运行路径要选在datapack的根目录,和pack.mcmeta并列
 
-import s3_mcpack as s3
+    import s3_mcpack as s3
 
-s3.installpack(r'<mcpath>')
+    s3.installpack(r'<mcpath>')
     
 类似这样就行
 
 随后会在执行路径的data/s3_tp/functions/下新建load.mcfunction
 
-setblock ~ ~ ~ oak_log
+    setblock ~ ~ ~ oak_log
 
-setblock ~ ~ ~ birch_log
+    setblock ~ ~ ~ birch_log
 
-setblock ~ ~ ~ spruce_log
+    setblock ~ ~ ~ spruce_log
 
-setblock ~ ~ ~ dark_oak_log
+    setblock ~ ~ ~ dark_oak_log
 
-setblock ~ ~ ~ acacia_log
+    setblock ~ ~ ~ acacia_log
 
-setblock ~ ~ ~ jungle_log
+    setblock ~ ~ ~ jungle_log
 
 同一级可以有多个相同的命令
 
@@ -69,11 +69,12 @@ setblock ~ ~ ~ jungle_log
 
 每个自定义命令需要有3个允许的输入值，分别表示
 
-    当前行（去掉了#，并且根据空格划分进了list，并且全部运行了一次eval()，注意函数名和#间不能有空格），
-    
-    当前对应的缩进下的全部内容（如果有，每一行去掉一级缩进后放进了list），
-    
-    以及前面留下的flag（如果有）
+
+当前行（去掉了#，并且根据空格划分进了list，并且全部运行了一次eval()，注意函数名和#间不能有空格），
+
+当前对应的缩进下的全部内容（如果有，每一行去掉一级缩进后放进了list），
+
+以及前面留下的flag（如果有）
     
 其中return的第一项得是一项字符串组成的列表，每个字符串将作为一行放进在原来文件中的位置，第二项是flag
 
