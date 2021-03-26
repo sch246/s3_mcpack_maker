@@ -32,17 +32,13 @@
 以下是一个mcfunction文件,绝对路径记为mcpath
     
     #setfunc s3_tp:load
-
         #mcfor treetype in ['oak','birch','spruce','dark_oak','acacia','jungle']
-
             #mc setblock ~ ~ ~ treetype_log
 
 因为刚做好大概的就发上来了所以要使用得用python的命令行或新建脚本来运行,注意运行路径要选在datapack的根目录,和pack.mcmeta并列
 
     import s3_mcpack as s3
-    
     mcpath = 对应mcfunction的路径
-
     s3.installpack(mcpath)
     
 类似这样就行
@@ -52,15 +48,10 @@
 在执行路径下的data/s3_tp/functions/load.mcfunction
 
     setblock ~ ~ ~ oak_log
-
     setblock ~ ~ ~ birch_log
-
     setblock ~ ~ ~ spruce_log
-
     setblock ~ ~ ~ dark_oak_log
-
     setblock ~ ~ ~ acacia_log
-
     setblock ~ ~ ~ jungle_log
 
 
@@ -112,7 +103,6 @@
 #从文件读取内容，以及保存内容到文件, 路径为可选参数，这里的路径指文件路径
 
     <变量名>.load([path])    例子: mcf.load()
-
     <变量名>.save([path])
 
 #改变值(内容)，除了file和mcjson外其它的value都是字符串列表的形式，不读取文件默认为空列表，需要保存到文件以使内容生效
@@ -122,7 +112,6 @@
 #增加项目，注意，这是tag独有的方法，如果原来存在同名项目，则会被删去，新添加的项目会在列表的末尾
 
     <变量名>.add(<MC中的一个对应的标签>)        #单纯地增加一个项目
-    
     <变量名>.add_s(<MC中的一个对应的标签>)      #增加一个required:false的项目
 
 #改变路径，改变路径会改变除了值以外的所有参数
