@@ -305,7 +305,7 @@ class func(file):
         if again >= 1:
             self.analyze()
         
-
+ 
 def installpack(path):
     mcf = func('awa')
     mcf.path = path
