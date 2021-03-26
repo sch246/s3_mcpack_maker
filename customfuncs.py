@@ -56,3 +56,74 @@ def mc(command, value=[], flag=''):
     for obj in command[2:len(command)]:
         a_str += ' ' + str(obj)
     return [a_str]
+
+
+def setblocktag(command, value, flag=''):
+    mcf = s3.blocktag(command[1])
+    # mcf.print()
+    for str in value:
+        str2 = ''
+        checkstr = 'execute if block ~ ~ ~ '
+        checklen = len(checkstr)
+        if len(str) > checklen and str[0:checklen] == checkstr:
+            for char in str[checklen:len(str)]:
+                if char == ' ':
+                    break
+                else:
+                    str2 += char
+            mcf.value.append(str2)
+    mcf.save()
+
+
+def setfunctag(command, value, flag=''):
+    mcf = s3.functag(command[1])
+    # mcf.print()
+    for str in value:
+        str2 = ''
+        checkstr = 'function '
+        checklen = len(checkstr)
+        if len(str) > checklen and str[0:checklen] == checkstr:
+            for char in str[checklen:len(str)]:
+                if char == ' ':
+                    break
+                else:
+                    str2 += char
+            mcf.value.append(str2)
+    mcf.save()
+
+
+def setentitytag(command, value, flag=''):
+    mcf = s3.entitytag(command[1])
+    # mcf.print()
+    for str in value:
+        str2 = ''
+        checkstr = 'execute if entity @e[type='
+        checklen = len(checkstr)
+        if len(str) > checklen and str[0:checklen] == checkstr:
+            for char in str[checklen:len(str)]:
+                if char == ']':
+                    break
+                else:
+                    str2 += char
+            mcf.value.append(str2)
+    mcf.save()
+
+
+def setfluidtag(command, value, flag=''):
+    mcf = s3.fluidtag(command[1])
+    mcf.print()
+    for str in value:
+        str2 = ''
+        checkstr = '#'
+        checklen = len(checkstr)
+        if len(str) > checklen and str[0:checklen] == checkstr:
+            for char in str[checklen:len(str)]:
+                if char == ' ':
+                    if str2 == '':
+                        continue
+                    else:
+                        break
+                else:
+                    str2 += char
+            mcf.value.append(str2)
+    mcf.save()
