@@ -186,13 +186,7 @@ def partstr(str):
         else:
             if char != ' ':
                 value[-1] += char
-        value2 = []
-        for str in re_empty(value):
-            try:
-                value2.append(eval(str))
-            except:
-                value2.append(str)
-    return value2
+    return re_empty(value)
 
 
 
