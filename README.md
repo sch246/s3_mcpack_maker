@@ -136,37 +136,21 @@
 #显示的样子
 
     ========================
-    
     name: #load
-    
     type_path: tags/functions
-    
     path: data/minecraft/tags/functions/load.json
-    
     space: minecraft
-    
     space_path: load
-    
     value:
-    
     [
-    
         {
-        
             "required": false,
-            
             "id": "s3_def:scb/load"
-            
         },
-        
         {
-        
             "required": false,
-            
             "id": "s3_def:scb/load2"
-            
         }
-        
     ]
  
 #递归对内容进行分析并运行对应函数，目前只有func有此方法，将会调用customfuncs.py内的函数
