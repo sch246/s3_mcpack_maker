@@ -170,7 +170,7 @@ def cuthash(list):
             str = cutfirst(str)
         list2.append(str.replace(' ',''))
     return list2
-        
+
 
 def partstr(str):
     value = ['']
@@ -217,7 +217,7 @@ class customfunc:
         self.function = getattr(customfuncs, self.name, None)
 
     def execute(self, flag):
-        self.command = evallist(self.command)
+        # self.command = evallist(self.command)
         return self.function(self.command, self.value, flag)
 
 
@@ -305,7 +305,7 @@ class func(file):
         if again >= 1:
             self.analyze()
         
- 
+
 def installpack(path):
     mcf = func('awa')
     mcf.path = path
@@ -314,3 +314,4 @@ def installpack(path):
     mcf.analyze()
     mcf.value = save
     mcf.save()
+ 
