@@ -31,8 +31,8 @@
 
 以下是一个mcfunction文件,绝对路径记为mcpath
     
-    #setfunc s3_tp:load
-        #mcfor treetype in ['oak','birch','spruce','dark_oak','acacia','jungle']
+    #set func s3_tp:load
+        #for_ treetype in ['oak','birch','spruce','dark_oak','acacia','jungle']
             #mc setblock ~ ~ ~ treetype_log
 
 因为刚做好大概的就发上来了所以要使用得用python的命令行或新建脚本来运行,注意运行路径要选在datapack的根目录,和pack.mcmeta并列
