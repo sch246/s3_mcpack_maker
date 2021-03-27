@@ -8,9 +8,84 @@ def setfunc(command, value, flag=''):
     mcf.value = value
     mcf.save()
     mcf.analyze()
+    
+
+def set(command, value, flag=''):
+    if command[1] == 'func':
+        mcf = s3.func(command[2])
+        mcf.value = value
+        mcf.save()
+        mcf.analyze()
+    if command[1] == 'tag':
+        if command[2] == 'block':
+            mcf = s3.blocktag(command[3])
+            # mcf.print()
+            for str in value:
+                str2 = ''
+                checkstr = 'execute if block ~ ~ ~ '
+                checklen = len(checkstr)
+                if len(str) > checklen and str[0:checklen] == checkstr:
+                    for char in str[checklen:len(str)]:
+                        if char == ' ':
+                            break
+                        else:
+                            str2 += char
+                    mcf.value.append(str2)
+            mcf.save()
+        if command[2] == 'func':
+            mcf = s3.functag(command[3])
+            # mcf.print()
+            for str in value:
+                str2 = ''
+                checkstr = 'function '
+                checklen = len(checkstr)
+                if len(str) > checklen and str[0:checklen] == checkstr:
+                    for char in str[checklen:len(str)]:
+                        if char == ' ':
+                            break
+                        else:
+                            str2 += char
+                    mcf.value.append(str2)
+            mcf.save()
+        if command[2] == 'entity':
+            mcf = s3.entitytag(command[3])
+            # mcf.print()
+            for str in value:
+                str2 = ''
+                checkstr = 'execute if entity @e[type='
+                checklen = len(checkstr)
+                if len(str) > checklen and str[0:checklen] == checkstr:
+                    for char in str[checklen:len(str)]:
+                        if char == ']':
+                            break
+                        else:
+                            str2 += char
+                    mcf.value.append(str2)
+            mcf.save()
+        if command[2] == 'fluid':
+            mcf = s3.fluidtag(command[3])
+            # mcf.print()
+            for str in value:
+                str2 = ''
+                checkstr = '#'
+                checklen = len(checkstr)
+                if len(str) > checklen and str[0:checklen] == checkstr:
+                    for char in str[checklen:len(str)]:
+                        if char == ' ':
+                            if str2 == '':
+                                continue
+                            else:
+                                break
+                        else:
+                            str2 += char
+                    mcf.value.append(str2)
+            mcf.save()
 
 
-def mcfor(command, value, flag=''):
+
+
+def for_(command, value, flag=''):
+    command = s3.evallist(command)
     list = []
     obj = command[1]
     if command[2] == 'in':
@@ -18,12 +93,30 @@ def mcfor(command, value, flag=''):
             for line in value:
                 list.append(line.replace(str(obj), str(range0)))
         return list
+def if_(command, value, flag=''):
+    command = s3.evallist(command)
+    if command[1]:
+        return value, ''
+    else:
+        return [], 'if_false'
+def elif_(command, value, flag):
+    command = s3.evallist(command)
+    if flag == 'if_false':
+        if command[1]:
+            return value, ''
+        else:
+            return [], 'if_false'
+def else_(command, value, flag):
+    command = s3.evallist(command)
+    if flag == 'if_false':
+        return value, ''
 
 
 def analyze(command, value=[], flag=''):
-    mcf = s3.func(command[1],)
-    mcf.load()
-    mcf.analyze()
+    if command[1] == 'func':
+        mcf = s3.func(command[2],)
+        mcf.load()
+        mcf.analyze()
 
 
 def let(command, value, flag=''):
@@ -31,99 +124,14 @@ def let(command, value, flag=''):
     obj = command[1]
     if command[2] == '=':
         for line in value:
-            list.append(line.replace(str(obj),str(command[3])))
+            list.append(line.replace(obj,str(eval(command[3]))))
         return list
 
 
-def mcif(command, value, flag=''):
-    if command[1]:
-        return value, ''
-    else:
-        return [], 'if_false'
-def mcelif(command, value, flag):
-    if flag == 'if_false':
-        if command[1]:
-            return value, ''
-        else:
-            return [], 'if_false'
-def mcelse(command, value, flag):
-    if flag == 'if_false':
-        return value, ''
-
 
 def mc(command, value=[], flag=''):
-    a_str = str(command[1])
+    a_str = command[1]
     for obj in command[2:len(command)]:
-        a_str += ' ' + str(obj)
+        a_str += ' ' + obj
     return [a_str]
-
-
-def setblocktag(command, value, flag=''):
-    mcf = s3.blocktag(command[1])
-    # mcf.print()
-    for str in value:
-        str2 = ''
-        checkstr = 'execute if block ~ ~ ~ '
-        checklen = len(checkstr)
-        if len(str) > checklen and str[0:checklen] == checkstr:
-            for char in str[checklen:len(str)]:
-                if char == ' ':
-                    break
-                else:
-                    str2 += char
-            mcf.value.append(str2)
-    mcf.save()
-
-
-def setfunctag(command, value, flag=''):
-    mcf = s3.functag(command[1])
-    # mcf.print()
-    for str in value:
-        str2 = ''
-        checkstr = 'function '
-        checklen = len(checkstr)
-        if len(str) > checklen and str[0:checklen] == checkstr:
-            for char in str[checklen:len(str)]:
-                if char == ' ':
-                    break
-                else:
-                    str2 += char
-            mcf.value.append(str2)
-    mcf.save()
-
-
-def setentitytag(command, value, flag=''):
-    mcf = s3.entitytag(command[1])
-    # mcf.print()
-    for str in value:
-        str2 = ''
-        checkstr = 'execute if entity @e[type='
-        checklen = len(checkstr)
-        if len(str) > checklen and str[0:checklen] == checkstr:
-            for char in str[checklen:len(str)]:
-                if char == ']':
-                    break
-                else:
-                    str2 += char
-            mcf.value.append(str2)
-    mcf.save()
-
-
-def setfluidtag(command, value, flag=''):
-    mcf = s3.fluidtag(command[1])
-    mcf.print()
-    for str in value:
-        str2 = ''
-        checkstr = '#'
-        checklen = len(checkstr)
-        if len(str) > checklen and str[0:checklen] == checkstr:
-            for char in str[checklen:len(str)]:
-                if char == ' ':
-                    if str2 == '':
-                        continue
-                    else:
-                        break
-                else:
-                    str2 += char
-            mcf.value.append(str2)
-    mcf.save()
+ 
