@@ -6,6 +6,7 @@ a_tab = '    '
 
 
 def mkfile(path):
+    # print(path)
     filename = os.path.split(path)[0]
     if not os.path.exists(filename):
         os.makedirs(filename)
@@ -210,10 +211,10 @@ def partstr(str):
     return re_empty(value)
 
 
-def partstrhead(str):
+def partstrhead(str,count):
     value = ['']
     for char in str:
-        if char == ' ' and len(value)==1:
+        if char == ' ' and len(value)<=count:
             value.append('')
         else:
             value[-1] += char
@@ -232,7 +233,7 @@ def evallist(list):
 
 class customfunc:
     def __init__(self,commandstr):
-        command = partstrhead(commandstr)
+        command = partstrhead(commandstr,1)
         self.name = command[0]
         try:
             self.command = command[1]
@@ -341,4 +342,3 @@ def installpack(path):
     mcf.analyze()
     mcf.value = save
     mcf.save()
- 
