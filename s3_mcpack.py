@@ -174,23 +174,23 @@ def cuthash(list):
 
 def partstr(str):
     value = ['']
-    hold_list = False
-    hold_dict = False
-    hold_bracket = False
+    hold_list = 0
+    hold_dict = 0
+    hold_bracket = 0
     for char in str:
         if char == '[':
-            hold_list == True
+            hold_list += 1
         if char == ']':
-            hold_list == False
+            hold_list -= 1
         if char == '{':
-            hold_dict == True
+            hold_dict += 1
         if char == '}':
-            hold_dict == False
+            hold_dict -= 1
         if char == '(':
-            hold_bracket == True
+            hold_bracket += 1
         if char == ')':
-            hold_bracket == False
-        if char == ' ' and hold_list == False and hold_bracket == False and hold_dict == False:
+            hold_bracket -= 1
+        if char == ' ' and hold_list <= 0 and hold_bracket <= 0 and hold_dict <= 0:
             value.append('')
         else:
             if char != ' ':
