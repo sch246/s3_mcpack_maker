@@ -216,9 +216,9 @@ class customfunc:
         self.value = []
         self.function = getattr(customfuncs, self.name, None)
 
-    def execute(self, flag):
+    def execute(self, dic):
         # self.command = evallist(self.command)
-        return self.function(self.command, self.value, flag)
+        return self.function(self.command, self.value, dic)
 
 
 
@@ -286,14 +286,16 @@ class func(file):
         # print(json.dumps(self.value, indent=4))
         # print(json.dumps(mcf.value, indent=4))
         self.value = []
-        flag = ''
+        dic = {'flag':''}
         for mcfunc in funcs:
             if type(mcfunc) == customfunc:
                 #通过返回值决定是否重复运行
-                alist = mcfunc.execute(flag)
+                alist = mcfunc.execute(dic)          #函数在这里运行
+                # 如果返回值是元组，取出dic
                 if type(alist) == type((1,2)):
-                    flag = alist[1]
+                    dic = alist[1]
                     alist = alist[0]
+                # 如果返回值是字符串列表，加进去并添加重置计数
                 if type(alist)==type([]):
                     for str in alist:
                         if type(str)==type(' '):
