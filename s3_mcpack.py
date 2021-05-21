@@ -177,7 +177,19 @@ def partstr(str):
     hold_list = 0
     hold_dict = 0
     hold_bracket = 0
+    hold_str = 0
+    hold_str2 = 0
     for char in str:
+        if char == '"':
+            if hold_str == 0:
+                hold_str = 1
+            else:
+                hold_str = 0
+        if char == '\'':
+            if hold_str2 == 0:
+                hold_str2 = 1
+            else:
+                hold_str2 = 0
         if char == '[':
             hold_list += 1
         if char == ']':
@@ -190,11 +202,21 @@ def partstr(str):
             hold_bracket += 1
         if char == ')':
             hold_bracket -= 1
-        if char == ' ' and hold_list <= 0 and hold_bracket <= 0 and hold_dict <= 0:
+        if char == ' ' and hold_list <= 0 and hold_bracket <= 0 and hold_dict <= 0 and hold_str == 0 and hold_str2 == 0:
             value.append('')
         else:
             if char != ' ':
                 value[-1] += char
+    return re_empty(value)
+
+
+def partstrhead(str):
+    value = ['']
+    for char in str:
+        if char == ' ' and len(value)==1:
+            value.append('')
+        else:
+            value[-1] += char
     return re_empty(value)
 
 
@@ -210,9 +232,13 @@ def evallist(list):
 
 class customfunc:
     def __init__(self,commandstr):
-        self.command = partstr(commandstr)
-        self.name = self.command[0]
-        # print(self.name,type(self.name))
+        command = partstrhead(commandstr)
+        self.name = command[0]
+        try:
+            self.command = command[1]
+        except:
+            self.command = ''
+        # print(self.name,'\n',self.command)
         self.value = []
         self.function = getattr(customfuncs, self.name, None)
 
@@ -263,7 +289,7 @@ class func(file):
             print(line)
         print('}')
 
-    def analyze(self):
+    def analyze(self, dic={'if': 0}):
         again = 0
         funcs = []
         for line in self.value:
@@ -286,7 +312,6 @@ class func(file):
         # print(json.dumps(self.value, indent=4))
         # print(json.dumps(mcf.value, indent=4))
         self.value = []
-        dic = {'flag':''}
         for mcfunc in funcs:
             if type(mcfunc) == customfunc:
                 #通过返回值决定是否重复运行
@@ -305,7 +330,7 @@ class func(file):
                 self.value.append(mcfunc)
         self.save()
         if again >= 1:
-            self.analyze()
+            self.analyze(dic)
         
 
 def installpack(path):
