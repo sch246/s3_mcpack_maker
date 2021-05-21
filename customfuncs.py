@@ -123,7 +123,7 @@ def analyze(command, value=[], dic={}):
 
 
 def let(command, value=[], dic={}):
-    command = s3.partstr(command)
+    command = s3.partstrhead(command,2)
     list = []
     obj = command[0]
     if command[1] == '=':
@@ -135,15 +135,14 @@ def let(command, value=[], dic={}):
 
 def mc(command, value=[], dic={}):
     a_str = ''
-    for str in re.split(r'(dic\[.+\])', command):
-        if re.match(r'dic\[.+\]', str):
-            a_str += eval(str)
+    for str2 in re.split(r'(dic\[.+\])', command):
+        if re.match(r'dic\[.+\]', str2):
+            a_str += str(eval(str2))
         else:
-            a_str += str
+            a_str += str2
     return [a_str]
 
 
 def print_(command, value, dic={}):
     print(eval(command))
     return 0
- 
