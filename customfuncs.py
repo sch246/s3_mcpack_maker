@@ -1,24 +1,25 @@
 # -*- coding: UTF-8 -*-
-import os
+import os,re
 import s3_mcpack as s3
 
 
 def setfunc(command, value, dic={}):
-    mcf = s3.func(command[1])
+    mcf = s3.func(command)
     mcf.value = value
     mcf.save()
     mcf.analyze()
     
 
 def set(command, value, dic={}):
-    if command[1] == 'func':
-        mcf = s3.func(command[2])
+    command = s3.partstr(command)
+    if command[0] == 'func':
+        mcf = s3.func(command[1])
         mcf.value = value
         mcf.save()
         mcf.analyze()
-    if command[1] == 'tag':
-        if command[2] == 'block':
-            mcf = s3.blocktag(command[3])
+    if command[0] == 'tag':
+        if command[1] == 'block':
+            mcf = s3.blocktag(command[2])
             # mcf.print()
             for str in value:
                 str2 = ''
@@ -32,8 +33,8 @@ def set(command, value, dic={}):
                             str2 += char
                     mcf.value.append(str2)
             mcf.save()
-        if command[2] == 'func':
-            mcf = s3.functag(command[3])
+        if command[1] == 'func':
+            mcf = s3.functag(command[2])
             # mcf.print()
             for str in value:
                 str2 = ''
@@ -47,8 +48,8 @@ def set(command, value, dic={}):
                             str2 += char
                     mcf.value.append(str2)
             mcf.save()
-        if command[2] == 'entity':
-            mcf = s3.entitytag(command[3])
+        if command[1] == 'entity':
+            mcf = s3.entitytag(command[2])
             # mcf.print()
             for str in value:
                 str2 = ''
@@ -62,8 +63,8 @@ def set(command, value, dic={}):
                             str2 += char
                     mcf.value.append(str2)
             mcf.save()
-        if command[2] == 'fluid':
-            mcf = s3.fluidtag(command[3])
+        if command[1] == 'fluid':
+            mcf = s3.fluidtag(command[2])
             # mcf.print()
             for str in value:
                 str2 = ''
@@ -85,52 +86,64 @@ def set(command, value, dic={}):
 
 
 def for_(command, value, dic={}):
-    command = s3.evallist(command)
+    command = s3.evallist(s3.partstr(command))
     list = []
-    obj = command[1]
-    if command[2] == 'in':
-        for range0 in command[3]:
+    obj = command[0]
+    if command[1] == 'in':
+        for range0 in command[2]:
             for line in value:
                 list.append(line.replace(str(obj), str(range0)))
         return list
 def if_(command, value, dic={}):
-    command = s3.evallist(command)
-    if command[1]:
-        return value, ''
+    if eval(command):
+        dic['if'] = True
+        return value, dic
     else:
-        return [], 'if_false'
-def elif_(command, value, flag):
-    command = s3.evallist(command)
-    if flag == 'if_false':
-        if command[1]:
-            return value, ''
+        dic['if'] = False
+        return [], dic
+def elif_(command, value, dic):
+    if dic['if'] == False:
+        if eval(command):
+            dic['if'] = True
+            return value, dic
         else:
-            return [], 'if_false'
-def else_(command, value, flag):
-    command = s3.evallist(command)
-    if flag == 'if_false':
-        return value, ''
+            return []
+def else_(command, value, dic):
+    if dic['if'] == False:
+        dic['if'] = True
+        return value, dic
 
 
 def analyze(command, value=[], dic={}):
-    if command[1] == 'func':
-        mcf = s3.func(command[2],)
+    command = s3.partstr(command)
+    if command[0] == 'func':
+        mcf = s3.func(command[1])
         mcf.load()
         mcf.analyze()
 
 
-def let(command, value, dic={}):
+def let(command, value=[], dic={}):
+    command = s3.partstr(command)
     list = []
-    obj = command[1]
-    if command[2] == '=':
+    obj = command[0]
+    if command[1] == '=':
+        dic[obj] = eval(command[2])
         for line in value:
-            list.append(line.replace(obj,str(eval(command[3]))))
-        return list
+            list.append(line.replace(obj,str(eval(command[2]))))
+        return list, dic
 
 
- 
 def mc(command, value=[], dic={}):
-    a_str = command[1]
-    for obj in command[2:len(command)]:
-        a_str += ' ' + obj
+    a_str = ''
+    for str in re.split(r'(dic\[.+\])', command):
+        if re.match(r'dic\[.+\]', str):
+            a_str += eval(str)
+        else:
+            a_str += str
     return [a_str]
+
+
+def print_(command, value, dic={}):
+    print(eval(command))
+    return 0
+ 
