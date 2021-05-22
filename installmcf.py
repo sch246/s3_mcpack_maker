@@ -24,6 +24,8 @@ while not os.path.exists(mcfpath):
     except:
         input('请输入一个正常点的路径...')
 
+keep = input('原mcf的内容是否不变,不变则直接enter,否则输入任意符号后enter')
+
 os.chdir(packpath)
 input('数据包路径为: '+packpath+'\n待展开的mcf路径为: '+mcfpath+'\n按enter继续...')
-s3.installpack(mcfpath)
+s3.installpack(mcfpath,keep)
