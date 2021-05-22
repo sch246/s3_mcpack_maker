@@ -334,11 +334,12 @@ class func(file):
             self.analyze(dic)
         
 
-def installpack(path):
+def installpack(path,keep=''):
     mcf = func('awa')
     mcf.path = path
     mcf.load()
     save = mcf.value
     mcf.analyze()
-    mcf.value = save
-    mcf.save()
+    if keep == '':
+        mcf.value = save
+        mcf.save()
