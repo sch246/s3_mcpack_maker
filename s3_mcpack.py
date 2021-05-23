@@ -8,7 +8,7 @@ a_tab = '    '
 def mkfile(path):
     # print(path)
     filename = os.path.split(path)[0]
-    if not os.path.exists(filename):
+    if not os.path.exists(filename) and filename != '':
         os.makedirs(filename)
     if not os.path.exists(path):
         f = open(path, 'w')
