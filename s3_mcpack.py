@@ -221,7 +221,7 @@ def partstrhead(str,count):
     return re_empty(value)
 
 
-def evallist(list):
+def evallist(list,dic):
     list2 = []
     for str in list:
         try:
@@ -233,6 +233,7 @@ def evallist(list):
 
 class customfunc:
     def __init__(self,commandstr):
+        commandstr = cutfirst(commandstr)
         command = partstrhead(commandstr,1)
         self.name = command[0]
         try:
@@ -244,9 +245,51 @@ class customfunc:
         self.function = getattr(customfuncs, self.name, None)
 
     def execute(self, dic):
-        # self.command = evallist(self.command)
         return self.function(self.command, self.value, dic)
 
+
+def cutfuncs(value):
+    #切完后只有cusfunc和普通的字符串
+    funcs = []
+    for line in value:
+        #如果全是空格
+        if line.count(' ') == len(line):
+            funcs.append(line)
+        #如果是注释
+        elif line[0] == '#':
+            cusfunc = customfunc(line)
+            if hasattr(cusfunc.function, '__call__'):
+                funcs.append(cusfunc)
+            else:
+                funcs.append(line)
+        #如果是缩进
+        elif line[0:len(a_tab)] == a_tab:
+            try:
+                funcs[-1].value.append(cuttab(line))
+            except:
+                funcs.append(line)
+        else:
+            funcs.append(line)
+    return funcs
+
+
+def analyzefuncs(value,dic = {'if':0}):
+    list0 = []
+    for line in cutfuncs(value):
+        #如果这一行是cusfunc
+        if type(line) == customfunc:
+            alist = line.execute(dic)  # 函数在这里运行
+            # 如果返回值是元组，取出dic
+            if type(alist) == type((1, 2)):
+                dic = alist[1]
+                alist = alist[0]
+            # 如果返回值是字符串列表，递归
+            if type(alist) == type([]):
+                list0 = list0 + analyzefuncs(alist, dic)
+        #如果是普通字符串
+        else:
+            list0.append(line)
+    return list0
 
 
 class func(file):
@@ -291,55 +334,16 @@ class func(file):
         print('}')
 
     def analyze(self, dic={'if': 0}):
-        again = 0
-        funcs = []
-        for line in self.value:
-            if line.count(' ') == len(line):
-                funcs.append(line)
-            elif line[0] == '#':
-                line = cutfirst(line)
-                cusfunc = customfunc(line)
-                if hasattr(cusfunc.function, '__call__'):
-                    funcs.append(cusfunc)
-                else:
-                    funcs.append(line)
-            elif line[0:len(a_tab)] == a_tab:
-                try:
-                    funcs[-1].value.append(cuttab(line))
-                except:
-                    print('out')
-            else:
-                funcs.append(line)
-        # print(json.dumps(self.value, indent=4))
-        # print(json.dumps(mcf.value, indent=4))
-        self.value = []
-        for mcfunc in funcs:
-            if type(mcfunc) == customfunc:
-                #通过返回值决定是否重复运行
-                alist = mcfunc.execute(dic)          #函数在这里运行
-                # 如果返回值是元组，取出dic
-                if type(alist) == type((1,2)):
-                    dic = alist[1]
-                    alist = alist[0]
-                # 如果返回值是字符串列表，加进去并添加重置计数
-                if type(alist)==type([]):
-                    for str in alist:
-                        if type(str)==type(' '):
-                            self.value.append(str)
-                            again += 1
-            else:
-                self.value.append(mcfunc)
+        self.value = analyzefuncs(self.value,dic)
         self.save()
-        if again >= 1:
-            self.analyze(dic)
-        
 
-def installpack(path,keep=''):
+    
+
+def installpack(path):
     mcf = func('awa')
     mcf.path = path
     mcf.load()
     save = mcf.value
     mcf.analyze()
-    if keep == '':
-        mcf.value = save
-        mcf.save()
+    mcf.value = save
+    mcf.save()
