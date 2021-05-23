@@ -238,7 +238,10 @@ def myeval(str,dic):
         else:
             str2 += str[i]
         i += 1
-    return eval(str2)
+    try:
+        return eval(str2)
+    except:
+        return str2
     
             
 
@@ -246,10 +249,7 @@ def myeval(str,dic):
 def evallist(list,dic):
     list2 = []
     for str in list:
-        try:
-            list2.append(myeval(str, dic))
-        except:
-            list2.append(str)
+        list2.append(myeval(str, dic))
     return list2
 
 
