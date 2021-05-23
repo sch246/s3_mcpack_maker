@@ -139,10 +139,8 @@ def mc(command, value=[], dic={}):
     pattern = r"(dic\[.+?\])"
     list = re.split(pattern, command)
     list2 = re.findall(pattern, command)
-    print(list)
     for str2 in list:
         if str2 in list2:
-            print(eval(str2))
             a_str += str(eval(str2))
         else:
             a_str += str2
