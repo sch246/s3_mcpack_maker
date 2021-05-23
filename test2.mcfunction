@@ -1,7 +1,7 @@
 say a
 #set func s3_tp:load
     #for_ treetype in ['oak','birch','spruce','dark_oak','acacia','jungle']
-        #mc setblock ~ ~ ~ treetype_log
+        #mc setblock ~ ~ ~ <treetype>_log
     #set tag block #s3_tp:air
         execute if block ~ ~ ~ air
         execute if block ~ ~ ~ #acacia_logs
