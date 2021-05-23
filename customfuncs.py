@@ -146,3 +146,7 @@ def print_(command, value, dic={}):
 def run(command, value, dic={}):
     s3.myeval(command, dic)
     return 0
+
+
+def put(command, value, dic={}):
+    return [command] + value
