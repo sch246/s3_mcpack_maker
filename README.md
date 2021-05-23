@@ -45,7 +45,7 @@ mcf = mcfunction
     
     #set func s3_tp:load
         #for_ treetype in ['oak','birch','spruce','dark_oak','acacia','jungle']
-            #mc setblock ~ ~ ~ treetype_log
+            #mc setblock ~ ~ ~ <treetype>_log
 
 运行后会生成这样的东东
 
@@ -64,9 +64,70 @@ mcf = mcfunction
 
 
 
-#关于这样的注释命令可以怎么写
+#变量的使用
 
-见下
+统一使用\<variable\>来指代变量
+
+使用let variable = <...>来创建变量和给变量赋值
+
+<...>可以是任意能被myeval()解析的表达式
+
+变量是从上到下解析的，目测是全局通用的
+
+例如
+
+    #let a = 1
+    #let b = <a> + 1
+    #print_ <b>
+    #mc say <b>
+
+会得到2
+
+并且文件内会变成say 2
+
+
+
+#目前可以运行的命令，，
+
+自己去customfuncs.py里面找吧，，应该都挺易懂的(划掉)
+
+    #引号内填的是缩进下的每一行对应的内容
+
+    #创建mcfunction,只需要像在mc里填function一样,缩进后填内容
+    setfunc <func name>             'command'
+
+    #一般的文件创建(里面包含了setfunc,,)
+    set func <func name>            'command'
+        tag block <blocktag name>   'execute if block ~ ~ ~ <block name>'
+            func <functag name>     'function <func name>'
+            entity <entitytag name> 'execute if entity @e[type=<entity type>]'
+            fluid <fluidtag name>   '#<fluid type>'
+
+    #for循环,<target>和<range>和python一模一样
+    for_ <target> in <range>        'command'
+    
+    #if这一块,这个应该不需要解释,,
+    if_ <condition>                 'command'
+    elif_ <condition>               'command'
+    else_                           'command'
+
+    #展开对应路径的mcf,也许并没有什么用
+    analyze <func name>
+
+    #对变量进行赋值或运算(不建议的功能: 可以替换缩进下的内容)
+    let <variable> = <...>          ['command']
+
+    #将后面的命令作为mc命令放到原位,如果有变量则会被解析
+    mc <command>
+
+    #输出解析后的命令到命令行窗口
+    print_ <command>
+
+    #用myeval解析一下后面的字符串
+    run <command>
+
+    #把后面以及缩进后的东东直接放下来，没有任何用处
+    put <command>                   'command'
 
 
 
@@ -170,75 +231,16 @@ partstr: 清除所有空格，除了被()[]{}括住的内容单独作为一项�
 
 partstrhead: 按首先碰到的n个空格把字符串分成n+1份并作为列表返回
 
-evallist: 对列表的每一项尝试运行eval()
+myeval: 输入字符串,将其中的\<..\>形式的东西变成dic['..']后运行一次eval()然后返回
 
-installpack: 对指定路径的mcfunction进行展开，不更改内容(改了后改回去了)
+evallist: 对列表的每一项尝试运行myeval()
 
 cutfuncs: 输入一段字符串列表，返回只包含customfunc和字符串的列表
 
 analyzefuncs: 输入一段字符串列表,返回解析后的字符串列表
 
+installpack: 对指定路径的mcfunction进行展开，不更改内容(改了后改回去了)
 
-
-#目前可以运行的命令，，
-
-自己去customfuncs.py里面找吧，，应该都挺易懂的(划掉)
-
-    #引号内填的是缩进下的每一行对应的内容
-
-    #创建mcfunction,只需要像在mc里填function一样,缩进后填内容
-    setfunc <func name>             'command'
-
-    #一般的文件创建(里面包含了setfunc,,)
-    set func <func name>            'command'
-        tag block <blocktag name>   'execute if block ~ ~ ~ <block name>'
-            func <functag name>     'function <func name>'
-            entity <entitytag name> 'execute if entity @e[type=<entity type>]'
-            fluid <fluidtag name>   '#<fluid type>'
-
-    #简单的for循环,<target>和<range>和python一模一样,但原理是对command进行简单的字符串替换,对注释的内容也有效
-    for_ <target> in <range>        'command'
-    
-    #if这一块,这个应该不需要解释,,
-    if_ <condition>                 'command'
-    elif_ <condition>               'command'
-    else_                           'command'
-
-    #展开对应路径的mcf,也许并没有什么用
-    analyze <func name>
-
-    #对变量进行赋值或运算(不建议的功能: 可以替换缩进下的内容)
-    let <variable> = <...>          ['command']
-
-    #将后面的命令作为mc命令放到原位,如果有变量则会被解析
-    mc <command>
-
-    #输出解析后的命令到命令行窗口
-    print_ <command>
-
-    #用eval解析一下后面的字符串
-    run <command>
-
-#变量的使用
-
-统一使用dict['variable']来指代变量
-
-使用let variable = <...>来创建变量和给变量赋值
-
-<...>可以是任意能被eval()解析的表达式
-
-变量是从上到下解析的，目测是全局通用的
-
-例如
-
-    #let a = 1
-    #let b = dic['a'] + 1
-    #print_ dic['b']
-    #mc say dic['b']
-
-会得到2
-
-并且文件内会变成say 2
 
 #作者
 
