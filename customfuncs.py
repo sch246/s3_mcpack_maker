@@ -92,11 +92,11 @@ def for_(command, value, dic={}):
     obj = command[0]
     if command[1] == 'in':
         for range0 in command[2]:
-            for line in value:
-                list.append(line.replace(str(obj), str(range0)))
+            list.append(f'#let {obj} = {range0}')
+            list += value
         return list
 def if_(command, value, dic={}):
-    if eval(command):
+    if s3.myeval(command, dic):
         dic['if'] = True
         return value, dic
     else:
@@ -104,7 +104,7 @@ def if_(command, value, dic={}):
         return [], dic
 def elif_(command, value, dic):
     if dic['if'] == False:
-        if eval(command):
+        if s3.myeval(command, dic):
             dic['if'] = True
             return value, dic
         else:
@@ -128,30 +128,21 @@ def let(command, value=[], dic={}):
     list = []
     obj = command[0]
     if command[1] == '=':
-        dic[obj] = eval(command[2])
+        dic[obj] = s3.myeval(command[2],dic)
         for line in value:
-            list.append(line.replace(obj,str(eval(command[2]))))
+            list.append(line.replace(obj,str(s3.myeval(command[2],dic))))
         return list, dic
 
 
 def mc(command, value=[], dic={}):
-    a_str = ''
-    pattern = r"(dic\[.+?\])"
-    list = re.split(pattern, command)
-    list2 = re.findall(pattern, command)
-    for str2 in list:
-        if str2 in list2:
-            a_str += str(eval(str2))
-        else:
-            a_str += str2
-    return [a_str]
+    return [s3.evalstr(command,dic)]
 
 
 def print_(command, value, dic={}):
-    print(eval(command))
+    print(s3.myeval(command, dic))
     return 0
 
 
 def run(command, value, dic={}):
-    eval(command)
+    s3.myeval(command, dic)
     return 0
