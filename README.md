@@ -1,33 +1,43 @@
 # s3_mcpack_maker
 
-创建if时不需要跳转文件夹了，顺便解决了文件内和文件外的穷举问题，从头创建和继续使用都行
+解析mcf内特定注释并实现相应功能，从头创建和继续使用都行
 
 
 mcf = mcfunction
 
 #为啥创建这个东东
 
-因为在写我的世界(minecraft)数据包(datapack)的时候每写一个if就得跳转一个文件所以很烦
+开始是因为在写我的世界(minecraft)数据包(datapack)的时候每写一个if就得跳转一个文件很烦
 
 所以写了这个
+
+不过现在对于写mcfunc挺完善了
 
 #安装
 
 这是用来解析mcf内特定注释并实现相应功能的东东，所以要使用得先有一个写了特定注释的mcf,你可以使用示例来测试一下
 
-最好所有文件都放在目标数据包目录下
+最好所有文件都放在目标数据包目录下，否则需要手动指定路径
+
+.py文件是相互调用的
 
 因为是.py所以安装了python的话可以直接运行installmcf来展开,默认展开的文件是同目录下的load.mcfunction
-
-注意这两个文件是相互调用的所以改了名字的话里面也得一起改
 
 #使用
 
 在编辑一个mcfunction文件的时候可以添加一些特别的注释
 
-使用脚本对这个mcfunction进行解读实现对应的效果
+用installmcf.py对这个mcfunction进行解读实现对应的效果
 
-运行installmcf.py,输入目标数据包所在的文件夹和要展开的mcf,如果直接按2下enter的话就是默认工作目录为目标数据包且工作目录下有load.mcfunction
+运行installmcf.py,
+
+输入目标数据包所在的文件夹,Enter,直接enter会选择工作目录为目标数据包
+
+输入要展开的mcf,Enter,直接enter会选择当前工作目录下的load.mcfunction,即使前一个Enter选择了其它路径,工作目录暂且不变
+
+选择是否改变原文件的内容,Enter,直接enter默认不改变,如果想改变原文件内容，请随便输入什么后按Enter
+
+会显示出路径，再按一下Enter就是运行了
 
 你可以运行一下,当目录中出现load.mcfunction后进行编辑,随后再运行一下()
 
@@ -40,7 +50,7 @@ mcf = mcfunction
 运行后会生成这样的东东
 
 在执行路径下的data/s3_tp/functions/load.mcfunction
-
+    
     setblock ~ ~ ~ oak_log
     setblock ~ ~ ~ birch_log
     setblock ~ ~ ~ spruce_log
@@ -56,11 +66,7 @@ mcf = mcfunction
 
 #关于这样的注释命令可以怎么写
 
-同一级可以有多个相同的命令
-
-命令之间可以相互嵌套，也就是说在mcfor下面放一些setfunc可以循环生成文件
-
-有什么命令以及有什么作用可以查看并修改customfuncs.py
+见下
 
 
 
@@ -68,17 +74,19 @@ mcf = mcfunction
 
 编辑customfuncs.py
 
-每个自定义命令需要有3个允许的输入值，分别表示
+每个自定义命令有3个输入值，(<command>, <value>, <dic>)
 
-当前行（去掉了#，并且根据空格划分进了list，并且全部运行了一次eval()，注意函数名和#间不能有空格），
+<command> 是当前行的命令的字符串（就是#<命令名> <command> 中的<command>，注意函数名和#间不能有空格）
 
-当前对应的缩进下的全部内容（如果有，每一行去掉一级缩进后放进了list），
+<value> 是字符串列表, 存储当前对应的缩进下的全部内容（每一行去掉一级缩进）
 
-以及dic
+<dic> 是一个字典,存储之前留下的数据
 
-(dic是一个字典,存储之前留下的数据,注意解析的顺序并不是严格的从上至下,而是一层一层地解析的,所以在for里面放变量运算需要绕一点弯)(划掉，现在是从上到下解析的了)
+return [list] [dic] 有2个允许的值
 
-其中return的第一项得是一项字符串组成的列表，每个字符串将作为一行放进在原来文件中的位置,如果什么都不放的话可以填[]或者其它的什么东西(比如0)，第二项是dic,可以不填
+第一项 是一项字符串列表，每个字符串将作为一行放进在原来文件中的位置,如果什么都不放的话可以填[]或者其它的什么东西(比如0)
+
+第二项 是dic, 如果不想对dic作出改变可以不填
 
 
 
@@ -140,9 +148,9 @@ mcf = mcfunction
         }
     ]
  
-#递归对内容进行分析并运行对应函数，目前只有func有此方法，将会调用customfuncs.py内的函数
+#递归对内容进行分析并运行对应函数,可以输入参数列表，目前只有func有此方法，将会调用customfuncs.py内的函数
 
-    <变量名>.analyze()
+    <变量名>.analyze([dic])
 
 
 
@@ -165,6 +173,10 @@ partstrhead: 按首先碰到的n个空格把字符串分成n+1份并作为列表
 evallist: 对列表的每一项尝试运行eval()
 
 installpack: 对指定路径的mcfunction进行展开，不更改内容(改了后改回去了)
+
+cutfuncs: 输入一段字符串列表，返回只包含customfunc和字符串的列表
+
+analyzefuncs: 输入一段字符串列表,返回解析后的字符串列表
 
 
 
@@ -203,6 +215,9 @@ installpack: 对指定路径的mcfunction进行展开，不更改内容(改了�
 
     #输出解析后的命令到命令行窗口
     print_ <command>
+
+    #用eval解析一下后面的字符串
+    run <command>
 
 #变量的使用
 
