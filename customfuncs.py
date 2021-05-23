@@ -1,5 +1,6 @@
 # -*- coding: UTF-8 -*-
 import os,re
+from typing import Pattern
 import s3_mcpack as s3
 
 
@@ -86,7 +87,7 @@ def set(command, value, dic={}):
 
 
 def for_(command, value, dic={}):
-    command = s3.evallist(s3.partstr(command))
+    command = s3.evallist(s3.partstrhead(command, 2), dic)
     list = []
     obj = command[0]
     if command[1] == 'in':
@@ -135,8 +136,13 @@ def let(command, value=[], dic={}):
 
 def mc(command, value=[], dic={}):
     a_str = ''
-    for str2 in re.split(r'(dic\[.+\])', command):
-        if re.match(r'dic\[.+\]', str2):
+    pattern = r"(dic\[.+?\])"
+    list = re.split(pattern, command)
+    list2 = re.findall(pattern, command)
+    print(list)
+    for str2 in list:
+        if str2 in list2:
+            print(eval(str2))
             a_str += str(eval(str2))
         else:
             a_str += str2
@@ -145,4 +151,9 @@ def mc(command, value=[], dic={}):
 
 def print_(command, value, dic={}):
     print(eval(command))
+    return 0
+
+
+def run(command, value, dic={}):
+    eval(command)
     return 0
