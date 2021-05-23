@@ -221,15 +221,53 @@ def partstrhead(str,count):
     return re_empty(value)
 
 
+def myeval(str,dic):
+    str2 = ''
+    i = 0
+    while i < len(str):
+        if str[i] == '<':
+            i += 1
+            if str[i] != ' ' or '\t':
+                str1 = ''
+                while str[i] != '>':
+                    str1 += str[i]
+                    i += 1
+                str2 += 'dic[\''+str1+'\']'
+            else:
+                str2 += '<' + str[i]
+        else:
+            str2 += str[i]
+        i += 1
+    return eval(str2)
+    
+            
+
+
 def evallist(list,dic):
     list2 = []
     for str in list:
         try:
-            list2.append(eval(str))
+            list2.append(myeval(str, dic))
         except:
             list2.append(str)
     return list2
 
+
+def evalstr(command, dic):
+    a_str = ''
+    pattern = re.compile(r"(dic\[.+?\]|f\{.+?\})")
+    list = pattern.split(command)
+    list2 = pattern.findall(command)
+    for str2 in list:
+        if str2 in list2:
+            match = re.match(r'f\{(.+?)\}', str2)
+            if match:
+                str2 = match.group(1)
+            a_str += str(myeval(str2, dic))
+        else:
+            a_str += str(str2)
+    return a_str
+    
 
 class customfunc:
     def __init__(self,commandstr):
