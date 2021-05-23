@@ -255,7 +255,7 @@ def evallist(list,dic):
 
 def evalstr(command, dic):
     a_str = ''
-    pattern = re.compile(r"(dic\[.+?\]|f\{.+?\})")
+    pattern = re.compile(r"(<.+?>|f\{.+?\})")
     list = pattern.split(command)
     list2 = pattern.findall(command)
     for str2 in list:
