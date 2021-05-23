@@ -50,7 +50,7 @@ mcf = mcfunction
 运行后会生成这样的东东
 
 在执行路径下的data/s3_tp/functions/load.mcfunction
-    
+
     setblock ~ ~ ~ oak_log
     setblock ~ ~ ~ birch_log
     setblock ~ ~ ~ spruce_log
@@ -74,13 +74,13 @@ mcf = mcfunction
 
 编辑customfuncs.py
 
-每个自定义命令有3个输入值，(<command>, <value>, <dic>)
+每个自定义命令有3个输入值，(command, value, dic)
 
-<command> 是当前行的命令的字符串（就是#<命令名> <command> 中的<command>，注意函数名和#间不能有空格）
+command 是当前行的命令的字符串（就是#<命令名> command 中的command，注意函数名和#间不能有空格）
 
-<value> 是字符串列表, 存储当前对应的缩进下的全部内容（每一行去掉一级缩进）
+value 是字符串列表, 存储当前对应的缩进下的全部内容（每一行去掉一级缩进）
 
-<dic> 是一个字典,存储之前留下的数据
+dic 是一个字典,存储之前留下的数据
 
 return [list] [dic] 有2个允许的值
 
@@ -221,9 +221,9 @@ analyzefuncs: 输入一段字符串列表,返回解析后的字符串列表
 
 #变量的使用
 
-统一使用dict['<variable>']来指代变量
+统一使用dict['variable']来指代变量
 
-使用let <variable> = <...>来创建变量和给变量赋值
+使用let variable = <...>来创建变量和给变量赋值
 
 <...>可以是任意能被eval()解析的表达式
 
