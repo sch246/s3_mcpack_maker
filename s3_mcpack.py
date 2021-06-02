@@ -3,6 +3,10 @@ import os,json,re
 import customfuncs
 # 多少个空格算一次缩进
 a_tab = '    '
+the_dic = {'if': 0, 'json': {}, 'advance': {}, 'loot': {},
+           'predicate': {}, 'recipe': {}, 'dimension_type': {}, 'dimension': {}, 'tag': {'func': {}, 'block': {}, 'entity': {}, 'fluid': {}}}
+
+
 
 
 def mkfile(path):
@@ -11,7 +15,7 @@ def mkfile(path):
     if not os.path.exists(filename) and filename != '':
         os.makedirs(filename)
     if not os.path.exists(path):
-        f = open(path, 'w')
+        f = open(path, 'w', encoding='utf-8')
         f.close()
     
 
@@ -33,7 +37,7 @@ class file:
 
     def __getpath(self):
         match = re.match(
-            r'([\#a-z0-9_\-][a-z0-9_\-]*):([a-z0-9_\-/\.]*)', self.name)
+            r'([\#a-z0-9_\-][a-z0-9_\-\.]*):([a-z0-9_\-/\.]*)', self.name)
         if match != None:
             self.space = match.group(1).replace('#', '')
             self.space_path = match.group(2)
@@ -50,7 +54,7 @@ class file:
         if path == '':
             path = self.path
         mkfile(path)
-        f = open(path, 'w')
+        f = open(path, 'w', encoding='utf-8')
         f.write(self.value)
         f.close()
 
@@ -58,7 +62,7 @@ class file:
         if path == '':
             path = self.path
         mkfile(path)
-        f = open(path)
+        f = open(path, encoding='utf-8')
         self.value = f.read()
         f.close()
 
@@ -70,7 +74,7 @@ class mcjson(file):
         if path == '':
             path = self.path
         mkfile(path)
-        f = open(path, 'w')
+        f = open(path, 'w', encoding='utf-8')
         f.write(json.dumps(self.value, indent=4))
         f.close()
 
@@ -78,7 +82,7 @@ class mcjson(file):
         if path == '':
             path = self.path
         mkfile(path)
-        f = open(path)
+        f = open(path, encoding='utf-8')
         self.value = json.loads(f.read())
         f.close()
 
@@ -126,7 +130,7 @@ class tag(mcjson):
         if path == '':
             path = self.path
         mkfile(path)
-        f = open(path, 'w')
+        f = open(path, 'w', encoding='utf-8')
         f.write(json.dumps({"replace": False, "values": self.value}, indent=4))
         f.close()
         
@@ -134,7 +138,7 @@ class tag(mcjson):
         if path == '':
             path = self.path
         mkfile(path)
-        f = open(path)
+        f = open(path, encoding='utf-8')
         self.value = json.loads(f.read()).get('values')
         f.close()
 
@@ -232,7 +236,7 @@ def myeval(str,dic):
                 while str[i] != '>':
                     str1 += str[i]
                     i += 1
-                str2 += 'dic[\''+str1+'\']'
+                str2 += translatenbt(str1,dic)
             else:
                 str2 += '<' + str[i]
         else:
@@ -255,7 +259,7 @@ def evallist(list,dic):
 
 def evalstr(command, dic):
     a_str = ''
-    pattern = re.compile(r"(<.+?>|f\{.+?\})")
+    pattern = re.compile(r"(<[^ ]+?>|f\{.+?\})")
     list = pattern.split(command)
     list2 = pattern.findall(command)
     for str2 in list:
@@ -273,7 +277,10 @@ class customfunc:
     def __init__(self,commandstr):
         commandstr = cutfirst(commandstr)
         command = partstrhead(commandstr,1)
-        self.name = command[0]
+        try:
+            self.name = command[0]
+        except:
+            self.name = ''
         try:
             self.command = command[1]
         except:
@@ -311,19 +318,22 @@ def cutfuncs(value):
     return funcs
 
 
-def analyzefuncs(value,dic = {'if':0}):
+def analyzefuncs(value,path,dic = the_dic):
+    #输入字符串列表和函数路径名,返回解析完的字符串列表
+    dic['path'] = path
     list0 = []
     for line in cutfuncs(value):
         #如果这一行是cusfunc
         if type(line) == customfunc:
             alist = line.execute(dic)  # 函数在这里运行
-            # 如果返回值是元组，取出dic
-            if type(alist) == type((1, 2)):
-                dic = alist[1]
-                alist = alist[0]
+            # # 如果返回值是元组，取出dic
+            # if type(alist) == type((1, 2)):
+            #     dic = alist[1]
+            #     print('是否相等:',dic.__eq__(alist[1]))
+            #     alist = alist[0]
             # 如果返回值是字符串列表，递归
             if type(alist) == type([]):
-                list0 = list0 + analyzefuncs(alist, dic)
+                list0 = list0 + analyzefuncs(alist, path, dic)
         #如果是普通字符串
         else:
             list0.append(line)
@@ -342,7 +352,7 @@ class func(file):
         if path == '':
             path = self.path
         mkfile(path)
-        f = open(path, 'w')
+        f = open(path, 'w', encoding='utf-8')
         for line in self.value:
             f.write(line+'\n')
         f.close()
@@ -351,7 +361,7 @@ class func(file):
         if path == '':
             path = self.path
         mkfile(path)
-        f = open(path)
+        f = open(path, encoding='utf-8')
         self.value = []
         for line in f.readlines():
             self.value.append(line.replace('\n', ''))
@@ -371,8 +381,8 @@ class func(file):
             print(line)
         print('}')
 
-    def analyze(self, dic={'if': 0}):
-        self.value = analyzefuncs(self.value,dic)
+    def analyze(self, dic=the_dic):
+        self.value = analyzefuncs(self.value,self.name,dic)
         self.save()
 
     
@@ -385,3 +395,84 @@ def installpack(path, keep=''):
     if keep == '':
         mcf.value = save
         mcf.save()
+
+
+
+def mergelist(list):
+    # 将字符串列表转化为带换行的字符串
+    str0 = ''
+    for str1 in list:
+        str0 += str1+'\n'
+    return str0
+
+
+def partlines(str0):
+    # 将带换行的字符串去掉换行并变成字符串列表
+    return str0.split('\n')
+
+
+def dicUpdate(old_dic, new_dic):
+    oldkeys = old_dic.keys()
+    newkeys = new_dic.keys()
+    for key in newkeys:
+        if not ((key in oldkeys) and (type(old_dic[key]) == type({})) and (new_dic[key] == type({}))):
+            old_dic[key] = new_dic[key]
+        else:
+            old_dic[key] = dicUpdate(old_dic[key], new_dic[key])
+    return old_dic
+
+
+def listgetdic(dic0, strlist):
+    if len(strlist) == 0:
+        return dic0
+    if len(strlist)==1:
+        return dic0[strlist[0]]
+    elif len(strlist) > 1:
+        return listgetdic(dic0[strlist[0]],strlist[1:len(strlist)])
+
+
+def listsetdic(dic0, strlist, value):
+    if len(strlist) == 0:
+        dic0=value      #然而并没有什么用
+    if len(strlist) == 1:
+        dic0[strlist[0]] = value
+    if len(strlist) > 1:
+        if not strlist[0] in dic0.keys():
+            dic0[strlist[0]] = {}
+        listsetdic(dic0[strlist[0]], strlist[1:len(strlist)],value)
+
+
+def getnbt(nbt, dic):
+    #输入a.b.c等价于dic['a']['b']['c']
+    return listgetdic(dic,nbt.split('.'))
+def setnbt(nbt, value, dic):
+    #输入a.b.c等价于dic['a']['b']['c']
+    #作用:若输入setnbt('a.b.c','d.e.f',dic)将a.b.c的值改为d.e.f的值,若a.b.c不存在将会创建,若类型不同将会覆盖
+    return listsetdic(dic, nbt.split('.'), value)
+def mergenbt(nbt, value, dic):
+    #输入a.b.c等价于dic['a']['b']['c']
+    try:
+        getnbt(nbt, dic)
+    except:
+        setnbt(nbt, {}, dic)
+    old = nbt.split('.')
+    olddic = listgetdic(dic, old[0:len(old)-1])
+    if (type(olddic[old[-1]]) == type({})) and (type(value) == type({})):
+        #如果它们都是字典
+        dicUpdate(olddic[old[-1]], value)
+    else:
+        olddic[old[-1]] = value
+def removenbt(nbt, dic):
+    #输入a.b.c等价于dic['a']['b']['c']
+    nbt = nbt.split('.')
+    nbtdic = listgetdic(dic, nbt[0:len(nbt)-1])
+    del(nbtdic[nbt[-1]])
+
+def translatenbt(nbt,dic):
+    #输入a.b.c等价于dic['a']['b']['c']
+    str0='dic'
+    for key in nbt.split('.'):
+        str0+="['"+key+"']"
+    return str0
+
+    
