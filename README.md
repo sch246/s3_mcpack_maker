@@ -31,11 +31,13 @@ mcf = mcfunction
 
 运行installmcf.py,
 
+连续Enter4下会直接展开工作目录下的load.mcfunction到工作目录
+
 输入目标数据包所在的文件夹,Enter,直接enter会选择工作目录为目标数据包
 
 输入要展开的mcf,Enter,直接enter会选择当前工作目录下的load.mcfunction,即使前一个Enter选择了其它路径,工作目录暂且不变
 
-选择是否改变原文件的内容,Enter,直接enter默认不改变,如果想改变原文件内容，请随便输入什么后按Enter
+选择这次展开是否改变原文件的内容,Enter,直接enter默认不改变,如果想改变原文件内容，请随便输入什么后按Enter
 
 会显示出路径，再按一下Enter就是运行了
 
@@ -63,21 +65,47 @@ mcf = mcfunction
 文件中有更多的test...
 
 
+#字段环境
+
+注释命令由字段构成,一般情况下用空格分开,除了固定内容的字段外,字段内能填什么,该怎么填取决于字段环境
+
+命令的字段环境会在customfuncs里标出
+
+以下是字段环境的解释
+
+\<str\>: 作为字符串处理
+
+\<eval\>: 先查找形如\<a.b.c...\>的内容并转换为dic['a']['b']['c']...,随后对新的字符串运行eval(),所有在s3_mcpack中定义的函数都可以直接使用
+
+\<evalstr\>: 查找形如f{(..)}和(\<..\>)的内容,将括号内的内容用\<eval\>并转换为字符串后合并回原位置,处理新字符串
+
+\<nbt\>: 输入a.b.c..代表dic['a']['b']['c']...
+
+\<analyze\>: 仅在注释命令后的缩进中出现,表示会将其作为注释命令解析
 
 #变量的使用
 
-统一使用\<variable\>来指代变量
+所有的变量存储在一个名为dic的字典中，使用变量的方式取决于字段环境,例如对变量a.b.c和变量a
 
-使用let variable = <...>来创建变量和给变量赋值
+\<eval\>里: '\<a\>'和'\<a.b.c\>'
 
-<...>可以是任意能被myeval()解析的表达式
+\<evalstr\>里: '\<a\>'和'\<a.b.c\>',或者'f{\<a\>}'和'f{\<a.b.c\>}'
 
-变量是从上到下解析的，目测是全局通用的
+\<nbt\>里: 'a' 和 'a.b.c'
+
+可以使用#let \<nbt\> = \<eval\>来创建变量和给变量赋值
+
+也可以用#dic set \<nbt\> value \<eval\>
+
+或者#run setnbt('\<nbt\>',\<eval\>,dic)
+
+变量是从上到下解析，全局通用的
 
 例如
 
     #let a = 1
-    #let b = <a> + 1
+    #put
+        #let b = <a> + 1
     #print_ <b>
     #mc say <b>
 
@@ -85,49 +113,19 @@ mcf = mcfunction
 
 并且文件内会变成say 2
 
+#已有变量
+
+customfuncs已经使用了一些变量,更改它们时可以会出现一些预料之外的错误
+
+\<if\>: 用于控制if_,elif_,else_命令
+
+\<json\>\<predicate\>等: 用于dic load/save的默认赋值,将会保存/读取到json/predicate.<evalstr>
+
 
 
 #目前可以运行的命令，，
 
-自己去customfuncs.py里面找吧，，应该都挺易懂的(划掉)
-
-    #引号内填的是缩进下的每一行对应的内容
-
-    #创建mcfunction,只需要像在mc里填function一样,缩进后填内容
-    setfunc <func name>             'command'
-
-    #一般的文件创建(里面包含了setfunc,,)
-    set func <func name>            'command'
-        tag block <blocktag name>   'execute if block ~ ~ ~ <block name>'
-            func <functag name>     'function <func name>'
-            entity <entitytag name> 'execute if entity @e[type=<entity type>]'
-            fluid <fluidtag name>   '#<fluid type>'
-
-    #for循环,<target>和<range>和python一模一样
-    for_ <target> in <range>        'command'
-    
-    #if这一块,这个应该不需要解释,,
-    if_ <condition>                 'command'
-    elif_ <condition>               'command'
-    else_                           'command'
-
-    #展开对应路径的mcf,也许并没有什么用
-    analyze <func name>
-
-    #对变量进行赋值或运算(不建议的功能: 可以替换缩进下的内容)
-    let <variable> = <...>          ['command']
-
-    #将后面的命令作为mc命令放到原位,如果有变量则会被解析
-    mc <command>
-
-    #输出解析后的命令到命令行窗口
-    print_ <command>
-
-    #用myeval解析一下后面的字符串
-    run <command>
-
-    #把后面以及缩进后的东东直接放下来，没有任何用处
-    put <command>                   'command'
+所有注释命令都在customfuncs.py内创建,并且写了如何使用的注释
 
 
 
@@ -141,17 +139,20 @@ command 是当前行的命令的字符串（就是#<命令名> command 中的com
 
 value 是字符串列表, 存储当前对应的缩进下的全部内容（每一行去掉一级缩进）
 
-dic 是一个字典,存储之前留下的数据
+dic 是一个字典,用于存储变量
 
-return [list] [dic] 有2个允许的值
+return [list] 有1个允许的值
 
-第一项 是一项字符串列表，每个字符串将作为一行放进在原来文件中的位置,如果什么都不放的话可以填[]或者其它的什么东西(比如0)
-
-第二项 是dic, 如果不想对dic作出改变可以不填
+第一项 是一项字符串列表，每个字符串将作为一行放进在原来文件中的位置,如果什么都不放的话可以填[]或者其它的什么东西(比如0),返回的字符串列表会在下一条命令解析之前被再次解析
 
 
 
 #使用创建的类
+
+可以用以下代码查看有什么类(好耶)
+
+    import s3_mcpack as s3
+    help(s3)
 
 基本的类: file
 
@@ -215,7 +216,13 @@ return [list] [dic] 有2个允许的值
 
 
 
-创建的函数:
+#创建的函数:
+函数列表可以用以下代码得到(然而包括类)
+    import s3_mcpack as s3
+    for obj in s3.__dict__:
+        if hasattr(getattr(s3,obj),'__call__'):
+            print(obj)
+
 
 mkfile: 创建对应路径的文件
 
@@ -231,7 +238,7 @@ partstr: 清除所有空格，除了被()[]{}括住的内容单独作为一项�
 
 partstrhead: 按首先碰到的n个空格把字符串分成n+1份并作为列表返回
 
-myeval: 输入字符串,将其中的\<..\>形式的东西变成dic['..']后运行一次eval()然后返回
+myeval: 输入字符串,将其中的\<a.b..\>形式的东西变成dic['a']['b']..后运行一次eval()然后返回
 
 evallist: 对列表的每一项尝试运行myeval()
 
@@ -240,6 +247,26 @@ cutfuncs: 输入一段字符串列表，返回只包含customfunc和字符串的
 analyzefuncs: 输入一段字符串列表,返回解析后的字符串列表
 
 installpack: 对指定路径的mcfunction进行展开，不更改内容(改了后改回去了)
+
+mergelist: 将字符串列表转化为带换行的字符串
+
+partlines: 将带换行的字符串去掉换行并变成字符串列表
+
+dicUpdate: 合并字典,包括子字典
+
+listgetdic: 通过list获取字典下的字典下的字典...的值
+
+listsetdic: 通过list更改字典下的字典下的字典...的值
+
+getnbt: 把'a.b.c...'变成['a','b','c',...]运行listgetdic
+
+setnbt: 把'a.b.c...'变成['a','b','c',...]运行listsetdic
+
+mergenbt: 输入2个\<nbt\>,比较两个位置的值,若都是字典则合并,否则直接赋值
+
+removenbt: 输入1个\<nbt\>,移除该位置的值
+
+translatenbt: 输入'a.b.c...'返回'dic['a']['b']['c']...'
 
 
 #作者
