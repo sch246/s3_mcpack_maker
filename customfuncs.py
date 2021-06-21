@@ -157,12 +157,18 @@ def analyze(command, value, dic):
 
 
 def let(command, value, dic):
-    #可以用于赋值,然而有几种等价的语句
+    #可以用于赋值,接受后面或者缩进的内容
+    #你可以用这个和puts制作函数
     #let <nbt> = <eval>
-    command = s3.partstrhead(command,2)
-    list = []
-    if command[1] == '=':
-        s3.setnbt(command[0], s3.myeval(command[2], dic),dic)
+    command = s3.partstrhead(command, 2)
+    if len(command) == 1:
+        s3.setnbt(command[0], s3.mergelist(value), dic)
+    else:
+        if len(command)==2:
+            command.append('')
+        list = []
+        if command[1] == '=':
+            s3.setnbt(command[0], s3.myeval(command[2], dic),dic)
 
 
 def mc(command, value, dic):
@@ -186,7 +192,7 @@ def run(command, value, dic):
 
 
 def put(command, value, dic):
-    #把后面的内容以及缩进后的内容作为字符串放下来,不作任何操作
+    #把后面的内容以及缩进后的内容作为字符串放下来,不作任何操作(但是可能会再次被解析)
     #put <str>
     return [command] + value
 
@@ -291,3 +297,45 @@ def dic(command, value, dic):
             s3.mergenbt(c1, s3.myeval(command[3], dic), dic)
     if c0 == 'remove':
         s3.removenbt(c1,dic)
+
+
+def mcprint(command, value, dic):
+    #简单的tellraw
+    #mcprint <eval>
+    #使用方法 mcprint [(<text>,<color>),..]
+    list = s3.myeval(command, dic)
+    if type(list)!=type([]):
+        list = [list]
+    jsonlist = []
+    for Text in list:
+        jsonlist.append({'text':Text[0],'color':Text[1]})
+    str = 'tellraw @a '+ json.dumps(jsonlist)
+    return [str]
+
+
+def scb(command, value, dic):
+    #没什么用的scb简写..
+    #scb <0> <1> = <3>
+    #scb <0> <1> = <3> <4>
+    command = s3.partstr(s3.evalstr(command), dic)
+    if command[2] == '=':
+        if len(command) == 5:
+            return [f'scoreboard players operation {command[0]} {command[1]} = {command[3]} {command[4]}']
+        if len(command) == 4:
+            #scb <0> <1> = (<a>+<b>)
+            if '+' in command[3] or '-' in command[3] or '*' in command[3] or '/' in command[3] or '%' in command[3]:
+                pass
+            else:
+                return [f'scoreboard players set {command[0]} {command[1]} {command[3]}']
+    if command[2] in ['+=', '-=', '*=', '/=', '%=']:
+        if len(command) == 5:
+            return [f'scoreboard players operation {command[0]} {command[1]} {command[2]} {command[3]} {command[4]}']
+        if len(command) == 4:
+            return [f'scoreboard players set # tmp {command[3]}', f'scoreboard players operation {command[0]} {command[1]} {command[2]} # tmp']
+
+
+def puts(command, value, dic):
+    #把后面的内容解析后放下来,内容必须是字符串(可能会再次被解析)
+    #你可以用这个和let制作函数
+    #return_ <eval>
+    return s3.partlines(s3.myeval(command,dic))
