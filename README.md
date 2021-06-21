@@ -11,7 +11,9 @@ mcf = mcfunction
 
 所以写了这个
 
-不过现在对于写mcfunc挺完善了
+这只是个开头
+
+现在对于写mcfunc越来越完善了,也许可以作为一门新的语言？(大雾)
 
 #安装
 
@@ -120,6 +122,77 @@ customfuncs已经使用了一些变量,更改它们时可以会出现一些预�
 \<if\>: 用于控制if_,elif_,else_命令
 
 \<json\>\<predicate\>等: 用于dic load/save的默认赋值,将会保存/读取到json/predicate.<evalstr>
+
+
+#创建函数并使用递归
+
+利用customfuncs下的功能可以做到创建函数并使用递归,以下是一个简单例子
+
+    #let f
+        #if_ <n> > 0
+            #mc say <n>
+            #let n = <n>-1
+            #puts <f>
+    #let n = 5
+    #setfunc test
+        #puts <f>
+
+#将在minecraft:test的mcf中创建以下内容
+
+    say 5
+    say 4
+    say 3
+    say 2
+    say 1
+
+#但是更一般的函数不能这样创建,因为所有变量都是全局变量
+
+#以下是一个更一般的函数的例子,这个mcf的作用是建立一个scb和storage之间的容量为1024的映射,,这样就可以给1024个玩家每人分配一个nbt存储空间(因为懒得造例子就复制自己的数据包)
+
+    #let eff.func
+        #let n = <eff.input>[-1][0]
+        #let s = <eff.input>[-1][1]
+        #let x = <eff.input>[-1][2]
+        #let li = <eff.input>[-1][3]
+        #setfunc <s>
+            #if_ <n> == -1
+                #puts <f>
+            #if_ <n> > -1
+                #for_ c in [0,1]
+                    #let n = <eff.input>[-1][0]
+                    #let s = <eff.input>[-1][1]
+                    #let x = <eff.input>[-1][2]
+                    #let li = <eff.input>[-1][3]
+                    #if_ <n> > 0
+                        #mc execute unless data storage memory personf{<li>+'['+mystr(<c>)+']'} run data modify storage memory person<li> append value []
+                    #elif_ <n> == 0
+                        #mc execute unless data storage memory personf{<li>+'['+mystr(<c>)+']'} run data modify storage memory person<li> append value {}
+                    #let li = <li>+'['+mystr(<c>)+']'
+                    #let s = f"{<s>}_{<c>}/{<n>-1}"
+                    #mc execute if score memory slot matches f{<x>+<c>*2**<n>}..f{<x>+(2**(<n>+<c>))-1} run function <s>
+                    #run <eff.input>.append((<n>-1,<s>,<x>+<c>*2**<n>,<li>))
+                    #puts <eff>
+        #run <eff.input>.pop()
+
+    #let f
+        #mc execute if score # tmp matches 0 run data modify storage memory person<li> set from storage memoryinput person
+        #mc execute if score # tmp matches 1 run data modify storage memoryoutput person set from storage memory person<li>
+
+
+    #let eff.input = []
+    #let n = 9
+    #let s = 's3.math:memory/person/eff/'+mystr(<n>)
+    #let x = 0
+    #let li = ''
+    #run <eff.input>.append((<n>,<s>,<x>,<li>))
+    #puts <eff.func>
+
+
+#这里使用了list来模拟栈,list.pop()和list.append()来控制内容的进出,使用元组来存储输入参数
+
+#函数在最后一定要运行pop()来清除变量
+
+#可以注意到for内重新赋值了一次变量,那是因为在for内改变了变量的值,,
 
 
 
@@ -266,7 +339,15 @@ mergenbt: 输入2个\<nbt\>,比较两个位置的值,若都是字典则合并,�
 
 removenbt: 输入1个\<nbt\>,移除该位置的值
 
-translatenbt: 输入'a.b.c...'返回'dic['a']['b']['c']...'
+translatenbt: 输入'a.b[n].c...'返回'dic['a']['b'][n]['c']...'
+
+splitnbt: 输入'a.b[n].c...'返回['a','b',n,'c'...],其中n只能是数字
+
+log2_p: 输入一个数,得出用二分法需要的最少的层数(例如输入2输出1,输入3输出2,输入600输出10)
+
+mystr: 由于str()不能用所以用这个替代
+
+myint: 由于int()不能用所以用这个替代
 
 
 #作者
