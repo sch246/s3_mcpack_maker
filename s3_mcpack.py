@@ -1,5 +1,5 @@
 # -*- coding: UTF-8 -*-
-import os,json,re
+import os,json,re,math
 import customfuncs
 # 多少个空格算一次缩进
 a_tab = '    '
@@ -117,9 +117,9 @@ class tag(mcjson):
         self.value = []
 
     def add(self, name):
-        for str in self.value:
-            if str == name:
-                list.remove(str)
+        for str0 in self.value:
+            if str0 == name:
+                self.value.remove(str0)
         self.value.append(name)
         
     def add_s(self, name):
@@ -139,7 +139,10 @@ class tag(mcjson):
             path = self.path
         mkfile(path)
         f = open(path, encoding='utf-8')
-        self.value = json.loads(f.read()).get('values')
+        try:
+            self.value = json.loads(f.read()).get('values')
+        except:
+            self.value =[]
         f.close()
 
 
@@ -236,7 +239,7 @@ def myeval(str,dic):
                 while str[i] != '>':
                     str1 += str[i]
                     i += 1
-                str2 += translatenbt(str1,dic)
+                str2 += translatenbt(str1)
             else:
                 str2 += '<' + str[i]
         else:
@@ -444,18 +447,18 @@ def listsetdic(dic0, strlist, value):
 
 def getnbt(nbt, dic):
     #输入a.b.c等价于dic['a']['b']['c']
-    return listgetdic(dic,nbt.split('.'))
+    return listgetdic(dic,splitnbt(nbt))
 def setnbt(nbt, value, dic):
     #输入a.b.c等价于dic['a']['b']['c']
     #作用:若输入setnbt('a.b.c','d.e.f',dic)将a.b.c的值改为d.e.f的值,若a.b.c不存在将会创建,若类型不同将会覆盖
-    return listsetdic(dic, nbt.split('.'), value)
+    return listsetdic(dic, splitnbt(nbt), value)
 def mergenbt(nbt, value, dic):
     #输入a.b.c等价于dic['a']['b']['c']
     try:
         getnbt(nbt, dic)
     except:
         setnbt(nbt, {}, dic)
-    old = nbt.split('.')
+    old = splitnbt(nbt)
     olddic = listgetdic(dic, old[0:len(old)-1])
     if (type(olddic[old[-1]]) == type({})) and (type(value) == type({})):
         #如果它们都是字典
@@ -464,15 +467,67 @@ def mergenbt(nbt, value, dic):
         olddic[old[-1]] = value
 def removenbt(nbt, dic):
     #输入a.b.c等价于dic['a']['b']['c']
-    nbt = nbt.split('.')
+    nbt = splitnbt(nbt)
     nbtdic = listgetdic(dic, nbt[0:len(nbt)-1])
     del(nbtdic[nbt[-1]])
 
-def translatenbt(nbt,dic):
+def translatenbt(nbt):
     #输入a.b.c等价于dic['a']['b']['c']
-    str0='dic'
-    for key in nbt.split('.'):
-        str0+="['"+key+"']"
+    # 输入a[n].c呢==>dic['a'][n]['c']
+    str0="dic"
+    s = 0
+    i = 0
+    while i < len(nbt):
+        if nbt[i]=='.':
+            if s == 1:
+                str0 += "']"
+            s = 1
+            i += 1
+            str0 += "['"
+        elif nbt[i] == '[':
+            if s == 1:
+                str0 += "']"
+            s = 2
+        if s==0:
+            str0+="['"
+            s=1
+        str0 += nbt[i]
+        i += 1
+    if s == 1:
+        str0 += "']"
     return str0
 
-    
+
+def splitnbt(nbt):
+    #输入a.b.c等价于['a','b','c']
+    # 输入a[n].c呢==>['a',n,'c']
+    list0 = ['']
+    i = 0
+    while i < len(nbt):
+        if nbt[i] == '.':
+            list0.append('')
+            i+=1
+        elif nbt[i] == '[':
+            if i==0:
+                list0.pop()
+            str0=''
+            i += 1
+            while nbt[i]!=']'and i<len(nbt):
+                str0 += nbt[i]
+                i += 1
+            list0.append(int(str0))
+        if nbt[i]!=']':
+            list0[-1] += nbt[i]
+        i += 1
+    return list0
+
+
+def log2_p(num):
+    return math.ceil(math.log2(abs(num)))
+
+def mystr(a):
+    return str(a)
+
+
+def myint(a):
+    return int(a)
