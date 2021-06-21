@@ -115,7 +115,7 @@ mcf = mcfunction
 
 #已有变量
 
-customfuncs已经使用了一些变量,更改它们时可能会出现一些预料之外的错误
+customfuncs已经使用了一些变量,更改它们时可以会出现一些预料之外的错误
 
 \<if\>: 用于控制if_,elif_,else_命令
 
@@ -217,9 +217,7 @@ return [list] 有1个允许的值
 
 
 #创建的函数:
-
 函数列表可以用以下代码得到(然而包括类)
-
     import s3_mcpack as s3
     for obj in s3.__dict__:
         if hasattr(getattr(s3,obj),'__call__'):
