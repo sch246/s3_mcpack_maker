@@ -1,6 +1,6 @@
 # MC数据包生成
 
-[![license](https://img.shields.io/badge/license-GPL-1090c0.svg)](LICENSE)
+[![license](	https://img.shields.io/github/license/sch246/s3_mcpack_maker)](https://github.com/sch246/s3_mcpack_maker/blob/main/LICENSE)
 [![standard-readme compliant](https://img.shields.io/badge/readme%20style-standard-brightgreen.svg?style=flat-square)](https://github.com/RichardLitt/standard-readme)
 
 解析mcf内特定注释并实现相应功能，从头创建数据包，或者在已有数据包的基础上用来生成都行
